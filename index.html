@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        .chat-container { max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
+        .messages { max-height: 400px; overflow-y: scroll; }
+        .message { margin: 10px 0; padding: 10px; border-radius: 5px; background-color: #f1f1f1; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        <input type="text" id="messageInput" placeholder="Type a message..." />
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDn3T4Xl1jKbnB0Xz1LjtqSoqkPwjN2pxE",
+            authDomain: "reverb0.firebaseapp.com",
+            projectId: "reverb0",
+            storageBucket: "reverb0.appspot.com",
+            messagingSenderId: "614516787600",
+            appId: "1:614516787600:web:2d80d6f26787e8c11b4b15",
+            databaseURL: "https://reverb0-default-rtdb.firebaseio.com"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const messagesRef = ref(database, 'messages');
+
+        // Elements
+        const messagesElement = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+
+        // Add a new message to the database
+        function addMessage(text) {
+            const message = {
+                text,
+                timestamp: Date.now(),
+            };
+            push(messagesRef, message);
+        }
+
+        // Listen for new messages and display them
+        onChildAdded(messagesRef, (snapshot) => {
+            const message = snapshot.val();
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.textContent = message.text;
+            messagesElement.appendChild(messageElement);
+            messagesElement.scrollTop = messagesElement.scrollHeight;
+        });
+
+        // Send message on Enter key press
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && messageInput.value.trim() !== '') {
+                addMessage(messageInput.value.trim());
+                messageInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
